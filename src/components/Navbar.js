@@ -8,6 +8,7 @@ import { Menu, X } from 'lucide-react';
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [hash, setHash] = useState('');
     const pathname = usePathname();
 
     useEffect(() => {
@@ -18,52 +19,73 @@ export default function Navbar() {
                 setIsScrolled(false);
             }
         };
+
+        setHash(window.location.hash);
+
+        const handleHashChange = () => {
+            setHash(window.location.hash);
+        };
+
+        const handleLinkClick = () => {
+            setTimeout(() => {
+                setHash(window.location.hash);
+            }, 50);
+        };
+
         window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('hashchange', handleHashChange);
+        window.addEventListener('click', handleLinkClick);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('hashchange', handleHashChange);
+            window.removeEventListener('click', handleLinkClick);
+        };
     }, []);
+
+    useEffect(() => {
+        setHash(window.location.hash);
+    }, [pathname]);
 
     const navLinks = [
         { name: 'HOME', href: '/' },
-        { name: 'ABOUT NINTM', href: '/about' },
-        { name: 'SERVICES', href: '/#services' },
-        { name: 'BECOME A MODEL', href: '/register' },
-        { name: 'FAQ', href: '/#faq' },
+        { name: 'ABOUT US', href: '/about' },
         { name: 'CONTACT', href: '/#contact' },
     ];
 
     return (
         <>
             <header
-                className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-[#EAEAEA] ${isScrolled ? 'py-2 shadow-sm' : 'py-4'
+                className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b border-[#D4AF37]/20 ${isScrolled ? 'py-2 shadow-lg shadow-[#06162F]/50 bg-[#081C3A]/95 backdrop-blur-md' : 'py-4 bg-[#081C3A]'
                     }`}
             >
                 <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
 
                     {/* Logo Area */}
                     <Link href="/" className="flex flex-col group">
-                        <span className="font-serif text-xl sm:text-2xl md:text-3xl font-extrabold tracking-widest text-[#111111] group-hover:text-gold-champagne transition-colors duration-300">
+                        <span className="font-serif text-xl sm:text-2xl md:text-3xl font-extrabold tracking-widest text-[#D4AF37] group-hover:text-[#C9A24D] transition-colors duration-300">
                             NINTM
                         </span>
-                        <span className="text-[7px] md:text-[8px] font-sans tracking-[0.35em] text-gold-champagne font-bold -mt-0.5">
-                            THE COMEBACK 2026
-                        </span>
+
                     </Link>
 
                     {/* Centered Navigation */}
                     <nav className="hidden lg:flex items-center space-x-7">
                         {navLinks.map((link) => {
-                            const matchesSection = link.href.startsWith('/#') && pathname === '/';
-                            const isActive = pathname === link.href || (matchesSection && pathname === '/');
+                            const isHashMatch = link.href.includes('#') && hash === link.href.substring(link.href.indexOf('#'));
+                            const isActive = (link.href === '/' && pathname === '/' && !hash) ||
+                                (link.href === '/about' && pathname === '/about') ||
+                                isHashMatch;
                             return (
                                 <Link
                                     key={link.name}
                                     href={link.href}
-                                    className={`text-[10px] tracking-[0.2em] font-sans font-semibold transition-colors duration-300 relative py-1 hover:text-gold-champagne ${isActive ? 'text-[#111111]' : 'text-zinc-500'
+                                    className={`text-[10px] tracking-[0.2em] font-sans font-semibold transition-colors duration-300 relative py-1 hover:text-[#D4AF37] ${isActive ? 'text-[#D4AF37]' : 'text-[#D9E1EC]/80'
                                         }`}
                                 >
                                     {link.name}
                                     {isActive && (
-                                        <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-gold-champagne" />
+                                        <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[#D4AF37]" />
                                     )}
                                 </Link>
                             );
@@ -74,13 +96,13 @@ export default function Navbar() {
                     <div className="hidden lg:flex items-center space-x-5">
                         <Link
                             href="/register"
-                            className="px-6 py-2.5 bg-gold-champagne text-white hover:bg-black font-sans font-bold text-[10px] tracking-[0.2em] transition-all duration-300 rounded-none uppercase"
+                            className="px-6 py-2.5 bg-[#D4AF37] border border-transparent text-[#081C3A] hover:bg-[#081C3A] hover:text-[#D4AF37] hover:border-[#D4AF37] font-sans font-bold text-[10px] tracking-[0.2em] transition-all duration-300 rounded-none uppercase"
                         >
                             REGISTER NOW
                         </Link>
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="text-[#111111] hover:text-gold-champagne transition-colors p-1 cursor-pointer"
+                            className="text-[#D9E1EC] hover:text-[#D4AF37] transition-colors p-1 cursor-pointer"
                             aria-label="Toggle Menu"
                         >
                             <Menu className="w-5 h-5" />
@@ -91,13 +113,13 @@ export default function Navbar() {
                     <div className="flex items-center space-x-3 lg:hidden">
                         <Link
                             href="/register"
-                            className="px-3.5 py-1.5 bg-gold-champagne hover:bg-black text-white font-sans font-bold text-[9px] tracking-wider transition-colors duration-300 rounded-none"
+                            className="px-4 py-2 bg-[#D4AF37] border border-transparent hover:bg-[#081C3A] hover:text-[#D4AF37] hover:border-[#D4AF37] text-[#081C3A] font-sans font-extrabold text-[10px] tracking-wider transition-all duration-300 rounded-none"
                         >
-                            REGISTER
+                            REGISTER NOW
                         </Link>
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="text-[#111111] hover:text-gold-champagne transition-colors p-1"
+                            className="text-[#D9E1EC] hover:text-[#D4AF37] transition-colors p-1"
                             aria-label="Toggle Menu"
                         >
                             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -109,13 +131,13 @@ export default function Navbar() {
 
             {/* Mobile Drawer */}
             <div
-                className={`fixed inset-0 z-40 bg-white/98 backdrop-blur-lg flex flex-col justify-center items-center transition-all duration-500 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-40 bg-[#06162F]/98 backdrop-blur-lg flex flex-col justify-center items-center transition-all duration-500 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
                     }`}
             >
                 <div className="absolute top-6 right-6">
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="text-[#111111] hover:text-gold-champagne transition-colors p-2"
+                        className="text-[#D9E1EC] hover:text-[#D4AF37] transition-colors p-2"
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -123,20 +145,23 @@ export default function Navbar() {
 
                 <nav className="flex flex-col items-center space-y-6 text-center">
                     <Link href="/" className="mb-6 flex flex-col items-center" onClick={() => setIsOpen(false)}>
-                        <span className="font-serif text-3xl font-extrabold tracking-widest text-[#111111]">NINTM</span>
-                        <span className="text-[9px] font-sans tracking-[0.4em] text-gold-champagne font-bold mt-1">
+                        <span className="font-serif text-3xl font-extrabold tracking-widest text-[#D4AF37]">NINTM</span>
+                        <span className="text-[9px] font-sans tracking-[0.4em] text-[#C9A24D] font-bold mt-1">
                             THE COMEBACK 2026
                         </span>
                     </Link>
 
                     {navLinks.map((link) => {
-                        const isActive = pathname === link.href;
+                        const isHashMatch = link.href.includes('#') && hash === link.href.substring(link.href.indexOf('#'));
+                        const isActive = (link.href === '/' && pathname === '/' && !hash) ||
+                            (link.href === '/about' && pathname === '/about') ||
+                            isHashMatch;
                         return (
                             <Link
                                 key={link.name}
                                 href={link.href}
                                 onClick={() => setIsOpen(false)}
-                                className={`text-sm tracking-[0.25em] font-sans font-semibold transition-colors duration-300 ${isActive ? 'text-gold-champagne' : 'text-zinc-600 hover:text-[#111111]'
+                                className={`text-sm tracking-[0.25em] font-sans font-semibold transition-colors duration-300 ${isActive ? 'text-[#D4AF37]' : 'text-[#D9E1EC]/85 hover:text-[#D4AF37]'
                                     }`}
                             >
                                 {link.name}
@@ -147,7 +172,7 @@ export default function Navbar() {
                     <Link
                         href="/register"
                         onClick={() => setIsOpen(false)}
-                        className="mt-6 px-8 py-3 bg-gold-champagne text-white hover:bg-black font-sans font-bold text-xs tracking-[0.2em] transition-all duration-300 rounded-none w-56 text-center"
+                        className="mt-6 px-8 py-3 bg-[#D4AF37] border border-transparent hover:bg-[#081C3A] hover:text-[#D4AF37] hover:border-[#D4AF37] text-[#081C3A] font-sans font-bold text-xs tracking-[0.2em] transition-all duration-300 rounded-none w-56 text-center"
                     >
                         REGISTER NOW
                     </Link>
@@ -155,7 +180,7 @@ export default function Navbar() {
                     <Link
                         href="/admin"
                         onClick={() => setIsOpen(false)}
-                        className="text-[10px] text-zinc-400 hover:text-[#111111] tracking-widest font-sans transition-colors duration-300 mt-2 font-bold uppercase"
+                        className="text-[10px] text-zinc-500 hover:text-[#D4AF37] tracking-widest font-sans transition-colors duration-300 mt-2 font-bold uppercase"
                     >
                         ADMIN PANEL
                     </Link>

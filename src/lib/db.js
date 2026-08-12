@@ -39,17 +39,35 @@ export function saveRegistrations(registrations) {
 export function addRegistration(data) {
     const registrations = getRegistrations();
 
-    // Generate high-end Registration ID
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const registrationId = `NINTM-2026-${randomNum}`;
+    // Generate unique Registration ID if not provided
+    const registrationId = data.registrationId || data.id || `NINTM-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const newRegistration = {
-        id: registrationId,
-        ...data,
-        paymentStatus: 'Pending', // Pending, Successful, Failed
-        applicationStatus: 'Payment Successful', // Payment Pending -> Payment Successful -> Under Review -> Shortlisted -> Selected
+        registrationId,
+        id: registrationId, // Alias for backward compatibility
+        name: data.name || data.fullName || '',
+        fullName: data.name || data.fullName || '', // Alias for backward compatibility
+        instagramUsername: data.instagramUsername || '',
+        dateOfBirth: data.dateOfBirth || data.dob || '',
+        dob: data.dateOfBirth || data.dob || '', // Alias for backward compatibility
+        email: data.email || '',
+        phone: data.phone || '',
+        whatsapp: data.whatsapp || '',
+        height: data.height || '',
+        state: data.state || '',
+        city: data.city || '',
+        pincode: data.pincode || '',
+        fullLengthPhoto: data.fullLengthPhoto || '',
+        closeUpPhoto: data.closeUpPhoto || '',
+        paymentStatus: data.paymentStatus || 'PENDING', // PENDING, PAID, FAILED
+        paymentAmount: data.paymentAmount || 0,
+        razorpayOrderId: data.razorpayOrderId || '',
+        razorpayPaymentId: data.razorpayPaymentId || '',
+        razorpaySignature: data.razorpaySignature || '',
+        paymentDate: data.paymentDate || '',
         createdAt: new Date().toISOString(),
-        paymentDetails: null
+        updatedAt: new Date().toISOString(),
+        applicationStatus: data.applicationStatus || 'Payment Pending', // Admin review status alias
     };
 
     registrations.push(newRegistration);
@@ -57,15 +75,37 @@ export function addRegistration(data) {
     return newRegistration;
 }
 
-export function updateRegistrationStatus(id, paymentStatus, applicationStatus, paymentDetails = null) {
+export function updateRegistration(id, updates) {
     const registrations = getRegistrations();
-    const index = registrations.findIndex(r => r.id === id);
+    const index = registrations.findIndex(r => r.id === id || r.registrationId === id);
     if (index !== -1) {
-        if (paymentStatus) registrations[index].paymentStatus = paymentStatus;
-        if (applicationStatus) registrations[index].applicationStatus = applicationStatus;
-        if (paymentDetails) registrations[index].paymentDetails = paymentDetails;
+        registrations[index] = {
+            ...registrations[index],
+            ...updates,
+            updatedAt: new Date().toISOString()
+        };
+        // Keep ID aliases synchronized
+        if (updates.registrationId) registrations[index].id = updates.registrationId;
+        if (updates.name) registrations[index].fullName = updates.name;
+        if (updates.dateOfBirth) registrations[index].dob = updates.dateOfBirth;
+
         saveRegistrations(registrations);
         return registrations[index];
     }
     return null;
 }
+
+export function updateRegistrationStatus(id, paymentStatus, applicationStatus, paymentDetails = null) {
+    const updates = {};
+    if (paymentStatus) updates.paymentStatus = paymentStatus;
+    if (applicationStatus) updates.applicationStatus = applicationStatus;
+    if (paymentDetails) {
+        updates.razorpayPaymentId = paymentDetails.paymentId || '';
+        updates.razorpayOrderId = paymentDetails.orderId || '';
+        updates.razorpaySignature = paymentDetails.signature || '';
+        updates.paymentDate = paymentDetails.date || new Date().toISOString();
+        if (paymentDetails.amount) updates.paymentAmount = paymentDetails.amount;
+    }
+    return updateRegistration(id, updates);
+}
+

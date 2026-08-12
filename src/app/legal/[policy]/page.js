@@ -5,7 +5,6 @@ export function generateStaticParams() {
     return [
         { policy: 'terms' },
         { policy: 'privacy' },
-        { policy: 'model-agreement' },
         { policy: 'refund' },
         { policy: 'cancellation' },
         { policy: 'service-delivery' },
@@ -34,16 +33,6 @@ const policiesData = {
             'Payment details are processed via secure mock payment configurations. We do not store full credit card details or netbanking credentials in our local files.',
             'Analytical data and social links are utilized to optimize the website interface and improve campaign engagement. We do not sell or lease candidate details to third-party direct marketing lists.',
             'If you wish to view, edit, or request deletion of your submitted registration, please reach out to nintmofficial@gmail.com with your unique Registration ID.'
-        ]
-    },
-    'model-agreement': {
-        title: 'Model Agreement & Contract',
-        desc: 'The official participation contract outline for NINTM – The Comeback 2026. A detailed work agreement will be executed by finalists on Stamp Paper.',
-        content: [
-            'The grand winner of NINTM – The Comeback 2026 will receive a professional modeling and talent contract worth ₹15 Lakhs INR, legally executed on Stamp Paper with Creativatorss.',
-            'Finalists agree to join mandatory training modules, ramp grooming sessions, look test portfolios, and corporate brand campaigns organized during the build-up to the Grand Finale in December 2026.',
-            'Creativatorss will act as the exclusive representative for modeling bookings, brand endorsements, runway appearances, and talent management for selected winners during the contract term.',
-            'Selected contestants must behave professionally, preserve the brand integrity of NINTM, and follow standard event guidelines. Non-cooperation or unprofessional conduct may lead to immediate replacement.'
         ]
     },
     refund: {
@@ -97,40 +86,40 @@ export default async function PolicyPage({ params }) {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-white">
+        <div className="flex flex-col min-h-screen bg-[#081C3A] text-white font-sans selection:bg-[#D4AF37] selection:text-[#081C3A]">
             <Navbar />
 
-            <main className="flex-grow pt-40 pb-24 max-w-4xl mx-auto px-6">
-                <span className="text-[10px] uppercase tracking-[0.3em] text-gold-champagne font-extrabold font-sans mb-3 block">
+            <main className="flex-grow pt-40 pb-24 max-w-4xl mx-auto px-6 w-full">
+                <span className="text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] font-extrabold font-sans mb-3 block">
                     OFFICIAL POLICIES & AGREEMENTS
                 </span>
-                <h1 className="font-serif text-3xl md:text-5xl font-light tracking-tight text-[#111111] mb-6 uppercase">
+                <h1 className="font-serif text-3xl md:text-5xl font-light tracking-tight text-white mb-6 uppercase">
                     {data.title}
                 </h1>
-                <p className="text-zinc-[650] text-sm md:text-base leading-relaxed mb-10 pb-6 border-b border-zinc-200 italic font-serif">
+                <p className="text-[#D9E1EC]/70 text-sm md:text-base leading-relaxed mb-10 pb-6 border-b border-[#D4AF37]/20 italic font-serif">
                     {data.desc}
                 </p>
 
-                <div className="space-y-8 font-normal text-zinc-[650]">
+                <div className="space-y-8 font-normal">
                     {data.content.map((paragraph, index) => (
                         <div key={index} className="flex gap-4">
-                            <span className="font-serif text-sm text-gold-champagne font-bold opacity-80 w-6 shrink-0 mt-1">
+                            <span className="font-serif text-sm text-[#D4AF37] font-bold opacity-80 w-6 shrink-0 mt-1">
                                 {String(index + 1).padStart(2, '0')}
                             </span>
-                            <p className="text-xs md:text-sm text-zinc-[650] leading-relaxed font-sans font-normal">
+                            <p className="text-xs md:text-sm text-[#D9E1EC] leading-relaxed font-sans font-normal">
                                 {paragraph}
                             </p>
                         </div>
                     ))}
                 </div>
 
-                <div className="mt-16 pt-8 border-t border-zinc-200 flex justify-between items-center text-[10px] font-sans font-bold text-zinc-[400]">
+                <div className="mt-16 pt-8 border-t border-[#D4AF37]/20 flex justify-between items-center text-[10px] font-sans font-bold text-[#D9E1EC]/40">
                     <span>
                         NINTM // CREATIVATORSS LEGAL OFFICE 2026
                     </span>
                     <a
                         href="/register"
-                        className="text-xs tracking-wider text-gold-champagne hover:text-black font-semibold transition-colors duration-200 uppercase"
+                        className="text-xs tracking-wider text-[#D4AF37] hover:text-white font-semibold transition-colors duration-200 uppercase"
                     >
                         ← BACK TO REGISTRATION
                     </a>

@@ -7,29 +7,39 @@ export async function GET(request) {
         const search = searchParams.get('search') || '';
         const state = searchParams.get('state') || '';
         const status = searchParams.get('status') || '';
+        const paymentStatus = searchParams.get('paymentStatus') || '';
 
         let list = getRegistrations();
 
         // Sort by latest created
         list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        // Apply filters
+        // Apply search filter (Registration ID, Name, Phone, Email)
         if (search) {
             const q = search.toLowerCase();
             list = list.filter(r =>
+                (r.registrationId && r.registrationId.toLowerCase().includes(q)) ||
+                (r.id && r.id.toLowerCase().includes(q)) ||
+                (r.name && r.name.toLowerCase().includes(q)) ||
                 (r.fullName && r.fullName.toLowerCase().includes(q)) ||
                 (r.email && r.email.toLowerCase().includes(q)) ||
-                (r.phone && r.phone.toLowerCase().includes(q)) ||
-                (r.id && r.id.toLowerCase().includes(q))
+                (r.phone && r.phone.toLowerCase().includes(q))
             );
         }
 
+        // Apply state filter
         if (state) {
             list = list.filter(r => r.state && r.state.toLowerCase() === state.toLowerCase());
         }
 
+        // Apply application status filter
         if (status) {
             list = list.filter(r => r.applicationStatus && r.applicationStatus.toLowerCase() === status.toLowerCase());
+        }
+
+        // Apply payment status filter (PAID, PENDING, FAILED)
+        if (paymentStatus) {
+            list = list.filter(r => r.paymentStatus && r.paymentStatus.toUpperCase() === paymentStatus.toUpperCase());
         }
 
         return NextResponse.json({ success: true, registrations: list });
@@ -48,7 +58,7 @@ export async function POST(request) {
         }
 
         const registrations = getRegistrations();
-        const index = registrations.findIndex(r => r.id === id);
+        const index = registrations.findIndex(r => r.id === id || r.registrationId === id);
 
         if (index === -1) {
             return NextResponse.json({ error: 'Applicant not found' }, { status: 404 });

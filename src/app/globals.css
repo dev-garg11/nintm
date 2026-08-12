@@ -1,29 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-gold-champagne: #B8903F;
-  --color-gold-luxury: #C9A45C;
-  --color-gold-light: #E6D2A2;
+  --color-gold-champagne: #C9A24D;
+  --color-gold-metallic: #D4AF37;
+  --color-navy-deep: #081C3A;
+  --color-navy-card: #0B2347;
+  --color-navy-highlight: #102B52;
+  --color-navy-dark: #06162F;
+  --color-rich-red: #8B1E2D;
+  --color-rich-red-bright: #9E2335;
+  --color-text-sec: #D9E1EC;
 
-  --color-luxury-black: #111111;
-  --color-luxury-soft-black: #1A1A1A;
-
-  --color-bg-white: #FFFFFF;
-  --color-bg-ivory: #FAF8F3;
-  --color-bg-warm-white: #F7F5F0;
+  --color-luxury-black: #081C3A;
 
   --font-serif: var(--font-serif), Georgia, serif;
   --font-sans: var(--font-sans), sans-serif;
 }
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #111111;
+  --background: #081C3A;
+  --foreground: #FFFFFF;
 }
 
 body {
-  background-color: #FFFFFF;
-  color: #111111;
+  background-color: #081C3A;
+  color: #FFFFFF;
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.6;
@@ -47,17 +48,17 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #FAF8F3;
-  border-left: 1px solid #EAEAEA;
+  background: #06162F;
+  border-left: 1px solid #102B52;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #EAEAEA;
+  background: #102B52;
   border-radius: 0px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8903F;
+  background: #D4AF37;
 }
 
 /* Luxury keyframe animations */

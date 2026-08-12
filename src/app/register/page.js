@@ -1,1151 +1,578 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import {
-    Check,
-    Upload,
-    CreditCard,
-    FileText,
-    ShieldAlert,
-    ArrowRight,
-    ArrowLeft
-} from 'lucide-react';
+import { Upload, X, Camera, AlertCircle } from 'lucide-react';
 
 export default function Register() {
     const router = useRouter();
-    const [step, setStep] = useState(0);
-    // 0: Eligibility Info, 1: Basic, 2: Prof, 3: Address, 4: Wildcard, 5: Docs, 6: Social, 7: Confirm & Pay
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedGateway, setSelectedGateway] = useState('Razorpay');
+    const [errorMsg, setErrorMsg] = useState('');
 
-    const [formData, setFormData] = useState({
-        // Step 1: Basic details
-        fullName: '',
+    const [formInputs, setFormInputs] = useState({
+        name: '',
         instagramUsername: '',
-        dob: '',
-        gender: 'Female',
-        maritalStatus: 'Unmarried',
+        dateOfBirth: '',
         email: '',
-        countryCode: '+91',
         phone: '',
-
-        // Step 2: Professional Details
+        whatsapp: '',
         height: '',
-        dressSize: 'M',
-        vitalStats: '',
-        experience: 'Fresher',
-        profession: '',
+        state: '',
         city: '',
-        state: 'Delhi (NCR)',
-        country: 'India',
-
-        // Step 3: Address
-        streetAddress: '',
-        streetAddress2: '',
-        postalCode: '',
-        addressState: 'Delhi (NCR)',
-
-        // Step 4: Wildcard Details
-        wildcardNotes: '',
-
-        // Step 5: Documents (mock storage)
-        govIdName: '',
-        closeUpName: '',
-        midShotName: '',
-        fullLengthName: '',
-
-        // Step 6: Socials
-        instagram: '',
-        facebook: '',
-        portfolioWebsite: '',
-        otherSocial: '',
-
-        // Step 7: Agreement Checkbox
-        agreed: false,
+        pincode: ''
     });
 
-    const eligibilityChecklist = [
-        { label: 'Age Limit', val: '18 to 33 Years old' },
-        { label: 'Gender Category', val: 'Open to Female & Male participants' },
-        { label: 'Height (Female)', val: 'Minimum 5\'3" / 160 cm' },
-        { label: 'Height (Male)', val: 'Minimum 5\'7" / 170 cm' },
-        { label: 'Marital Status', val: 'Married & Unmarried candidates can apply' },
-        { label: 'Citizenship', val: 'Indian Nationals & NRI status candidates eligible' },
-        { label: 'Modeling Experience', val: 'Freshers & Experienced models both welcome' },
-        { label: 'Body Type', val: 'No specific measurements. Confidence & attitude matter more' },
-        { label: 'Language Skills', val: 'Basic communication preferred. No mandatory requirements' },
-        { label: 'Education Criteria', val: 'No minimum educational qualification required' },
-        { label: 'Fitness Index', val: 'Physically fit to participate in grooming & training stages' }
-    ];
+    const [photos, setPhotos] = useState({
+        fullLength: null,
+        closeUp: null
+    });
 
-    const northStates = [
-        'Delhi (NCR)', 'Punjab', 'Haryana', 'Himachal Pradesh', 'Jammu & Kashmir', 'Uttarakhand', 'Uttar Pradesh', 'Rajasthan', 'Chandigarh (UT)'
+    const [previews, setPreviews] = useState({
+        fullLength: '',
+        closeUp: ''
+    });
+
+    const fullLengthInputRef = useRef(null);
+    const closeUpInputRef = useRef(null);
+
+    const indianStates = [
+        'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana',
+        'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+        'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana',
+        'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi (NCR)', 'Chandigarh (UT)', 'Jammu & Kashmir', 'Other'
     ];
 
     const handleInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value,
-        }));
+        const { name, value } = e.target;
+        setFormInputs(prev => ({ ...prev, [name]: value }));
     };
 
     const handleFileChange = (e, fieldName) => {
         const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File size exceeds the 5 MB limit.');
-                return;
-            }
-            setFormData((prev) => ({
-                ...prev,
-                [fieldName]: file.name
-            }));
-        }
-    };
+        if (!file) return;
 
-    const stepsLabel = [
-        { title: 'Eligibility', desc: 'Pre-check' },
-        { title: 'Personal', desc: 'Contact details' },
-        { title: 'Profile', desc: 'Measurements' },
-        { title: 'Address', desc: 'Mailing info' },
-        { title: 'Wildcard', desc: 'State choices' },
-        { title: 'Credentials', desc: 'ID & Photos' },
-        { title: 'Social Links', desc: 'Portfolios' },
-        { title: 'Checkout', desc: 'Review & Pay' }
-    ];
-
-    const handleNextStep = () => {
-        if (step === 1) {
-            if (!formData.fullName || !formData.email || !formData.phone || !formData.dob) {
-                alert('Please fill out all required basic details.');
-                return;
-            }
-        }
-        if (step === 2) {
-            if (!formData.height || !formData.city) {
-                alert('Please fill height and city credentials.');
-                return;
-            }
-        }
-        if (step === 3) {
-            if (!formData.streetAddress || !formData.postalCode) {
-                alert('Please complete the primary address parameters.');
-                return;
-            }
-        }
-        setStep((prev) => Math.min(prev + 1, stepsLabel.length - 1));
-    };
-
-    const handlePrevStep = () => {
-        setStep((prev) => Math.max(prev - 1, 0));
-    };
-
-    const handleSubmitRegistration = async (e) => {
-        e.preventDefault();
-        if (!formData.agreed) {
-            alert('You must read and agree to all Eligibility Criteria and official policies before finalizing checkout.');
+        // Validation: Size (5 MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File size exceeds the 5 MB limit. Please choose a smaller image.');
             return;
         }
+
+        // Validation: Format (JPG, JPEG, PNG, WEBP)
+        const allowedExtensions = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowedExtensions.includes(file.type)) {
+            alert('Invalid file format. Allowed formats: JPG, JPEG, PNG, WEBP.');
+            return;
+        }
+
+        setPhotos(prev => ({ ...prev, [fieldName]: file }));
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setPreviews(prev => ({ ...prev, [fieldName]: reader.result }));
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemovePhoto = (fieldName) => {
+        setPhotos(prev => ({ ...prev, [fieldName]: null }));
+        setPreviews(prev => ({ ...prev, [fieldName]: '' }));
+        if (fieldName === 'fullLength' && fullLengthInputRef.current) {
+            fullLengthInputRef.current.value = '';
+        }
+        if (fieldName === 'closeUp' && closeUpInputRef.current) {
+            closeUpInputRef.current.value = '';
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setErrorMsg('');
+
+        // Required text validation
+        const { name, instagramUsername, dateOfBirth, email, phone, whatsapp, height, state, city, pincode } = formInputs;
+        if (!name || !instagramUsername || !dateOfBirth || !email || !phone || !whatsapp || !height || !state || !city || !pincode) {
+            setErrorMsg('Please fill out all required text fields.');
+            return;
+        }
+
+        // Required photos validation
+        if (!photos.fullLength || !photos.closeUp) {
+            setErrorMsg('Both Full Length and Close-Up photos are required.');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
-            const registerRes = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-            const registerData = await registerRes.json();
+            const formDataToSend = new FormData();
+            formDataToSend.append('name', name);
+            formDataToSend.append('instagramUsername', instagramUsername);
+            formDataToSend.append('dateOfBirth', dateOfBirth);
+            formDataToSend.append('email', email);
+            formDataToSend.append('phone', phone);
+            formDataToSend.append('whatsapp', whatsapp);
+            formDataToSend.append('height', height);
+            formDataToSend.append('state', state);
+            formDataToSend.append('city', city);
+            formDataToSend.append('pincode', pincode);
+            formDataToSend.append('fullLengthPhoto', photos.fullLength);
+            formDataToSend.append('closeUpPhoto', photos.closeUp);
 
-            if (!registerRes.ok || !registerData.success) {
-                throw new Error(registerData.error || 'Failed to submit registration.');
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                body: formDataToSend
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Failed to submit registration form.');
             }
 
-            const freshId = registerData.registration.id;
-            router.push(`/register/checkout?id=${freshId}&gateway=${selectedGateway}`);
+            const reg = data.registration;
+
+            // Generate absolute photo urls for WhatsApp message link parameters
+            const originUrl = window.location.origin;
+            const fullLengthUrl = originUrl + reg.fullLengthPhoto;
+            const closeUpUrl = originUrl + reg.closeUpPhoto;
+
+            // Prepare WhatsApp pre-filled message
+            const whatsappMessage = `Hello NINTM Team,
+
+I have registered for NINTM – The Comeback 2026.
+
+REGISTRATION DETAILS
+
+Registration ID: ${reg.registrationId}
+
+Name: ${reg.name}
+
+Instagram Username: ${reg.instagramUsername}
+
+Date of Birth: ${reg.dateOfBirth}
+
+Email: ${reg.email}
+
+Phone Number: ${reg.phone}
+
+WhatsApp Number: ${reg.whatsapp}
+
+Height: ${reg.height}
+
+State: ${reg.state}
+
+City: ${reg.city}
+
+Pincode: ${reg.pincode}
+
+PHOTO DETAILS
+
+Full Length Photo: Uploaded
+Close-Up Photo: Uploaded
+
+Photo Links:
+Full Length: ${fullLengthUrl}
+Close-Up: ${closeUpUrl}
+
+PAYMENT STATUS
+
+Payment Status: Pending
+
+Registration Fee: ₹6,999 + applicable GST
+
+I would like to proceed with my NINTM – The Comeback 2026 registration.
+
+Thank you.`;
+
+            // Open WhatsApp in new tab
+            const targetPhone = '918626000002';
+            const encodedText = encodeURIComponent(whatsappMessage);
+            const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedText}`;
+
+            try {
+                window.open(whatsappUrl, '_blank');
+            } catch (err) {
+                console.error('Failed to trigger pop-up redirect for WhatsApp.', err);
+            }
+
+            // Immediately redirect user to Stripe/Razorpay payment checkpoint
+            router.push(`/register/checkout?id=${reg.registrationId}`);
+
         } catch (err) {
             console.error(err);
-            alert(err.message || 'An error occurred during screening submission.');
+            setErrorMsg(err.message || 'An error occurred during submission.');
             setIsSubmitting(false);
         }
     };
 
-    const feeBase = 6999;
-    const gstRate = 0.18;
-    const gstAmount = Number((feeBase * gstRate).toFixed(2));
-    const finalTotalAmount = Number((feeBase + gstAmount).toFixed(2));
-
     return (
-        <div className="flex flex-col min-h-screen bg-white text-luxury-black font-sans selection:bg-gold-champagne selection:text-white">
+        <div className="flex flex-col min-h-screen bg-[#081C3A] text-white font-sans selection:bg-[#D4AF37] selection:text-[#081C3A]">
             <Navbar />
 
-            {/* Hero Head */}
-            <section className="relative pt-44 pb-20 bg-[#FAF8F3] border-b border-[#EAEAEA] overflow-hidden flex items-center">
+            {/* Header / Hero Section */}
+            <section className="relative pt-40 pb-16 bg-[#06162F] border-b border-[#D4AF37]/15 overflow-hidden flex items-center">
                 <div className="absolute inset-0 z-0">
+                    <div className="absolute inset-0 bg-[#081C3A]/90 z-10" />
                     <Image
-                        src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1200"
-                        alt="Registration Hero Background"
+                        src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1200"
+                        alt="Background Runway"
                         fill
                         sizes="100vw"
-                        quality={80}
-                        className="object-cover opacity-10 grayscale"
+                        quality={50}
+                        className="object-cover opacity-15 grayscale"
                         priority
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent" />
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full text-center">
-                    <span className="text-xs uppercase tracking-[0.45em] text-gold-champagne font-extrabold font-sans mb-3 block">
+                <div className="relative z-20 max-w-4xl mx-auto px-6 w-full text-center">
+                    <span className="text-[10px] uppercase tracking-[0.4em] text-[#D4AF37] font-extrabold mb-3 block">
                         NINTM – THE COMEBACK 2026
                     </span>
-                    <h1 className="font-serif text-3xl md:text-5xl font-light tracking-tight text-[#111111] mb-4 uppercase">
-                        Become a Model / Registration
+                    <h1 className="font-serif text-3xl md:text-5xl font-light tracking-tight text-white mb-4 uppercase">
+                        Candidate Registration
                     </h1>
-                    <p className="max-w-xl mx-auto text-zinc-500 text-xs md:text-sm font-sans tracking-wide leading-relaxed font-normal">
-                        Do you have the confidence, personality, and passion to make a mark in the modeling world? Set up your candidate profile to initiate casting reviews.
+                    <p className="max-w-xl mx-auto text-[#D9E1EC]/70 text-xs md:text-sm tracking-wide leading-relaxed font-normal">
+                        Submit your evaluation files below to register. Fill the 10 basic coordinates, upload your two photos, and proceed to checkout.
                     </p>
                 </div>
             </section>
 
-            {/* Main Form container */}
-            <main className="flex-grow py-16 max-w-5xl mx-auto px-6 w-full">
+            {/* Main Application Container */}
+            <main className="flex-grow py-12 max-w-4xl mx-auto px-6 w-full">
 
-                {/* Step Indicator top ribbon */}
-                <div className="hidden md:grid grid-cols-8 gap-2 mb-12 text-center relative font-sans text-xs">
-                    {stepsLabel.map((sl, index) => {
-                        const isPassed = index < step;
-                        const isCurrent = index === step;
-                        return (
-                            <div
-                                key={index}
-                                className={`relative flex flex-col items-center group cursor-pointer ${isCurrent ? 'text-gold-champagne font-bold' : isPassed ? 'text-[#111111]' : 'text-zinc-400'
-                                    }`}
-                                onClick={() => {
-                                    if (index < step) setStep(index);
-                                }}
-                            >
-                                <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs mb-2 transition-all duration-300 ${isCurrent
-                                    ? 'border-gold-champagne text-gold-champagne bg-gold-champagne/5 shadow-sm'
-                                    : isPassed
-                                        ? 'border-[#111111] text-white bg-[#111111]'
-                                        : 'border-zinc-200 text-zinc-400 bg-white'
-                                    }`}>
-                                    {isPassed ? <Check className="w-3.5 h-3.5" /> : index + 1}
-                                </div>
-                                <span className="text-[9px] uppercase tracking-wider block font-serif">
-                                    {sl.title}
-                                </span>
-                                <span className="text-[8px] text-zinc-400 font-sans tracking-tight font-normal block">
-                                    {sl.desc}
-                                </span>
-                            </div>
-                        );
-                    })}
+                {/* Information Card */}
+                <div className="mb-8 p-6 bg-[#0B2347] border border-[#D4AF37]/20 text-xs leading-relaxed text-[#D9E1EC]/90">
+                    <h3 className="font-serif text-[#D4AF37] text-sm uppercase font-bold mb-2">Instructions & Guidelines</h3>
+                    <ul className="list-disc pl-5 space-y-1 my-2">
+                        <li>Fill details accurately. The same Registration ID is used if payment is retried.</li>
+                        <li>Submit your details to open candidates inquiry on WhatsApp <strong>(+91 8626-000-002)</strong> before redirected to secure checkout.</li>
+                        <li>Registration requires exactly <strong>2 photographs</strong> (Full length + Close-up). Max 5 MB each. Allowed: JPG, JPEG, PNG, WEBP.</li>
+                    </ul>
                 </div>
 
-                {/* Form panel card */}
-                <div className="bg-white border border-zinc-200 p-8 md:p-12 shadow-sm">
+                {isSubmitting && (
+                    <div className="fixed inset-0 bg-[#081C3A]/90 backdrop-blur-sm z-50 flex items-center justify-center text-center">
+                        <div className="space-y-4">
+                            <div className="w-12 h-12 border-t-2 border-[#D4AF37] border-r-2 border-r-[#D4AF37]/20 rounded-full animate-spin mx-auto" />
+                            <p className="text-xs uppercase tracking-widest text-[#D4AF37] font-bold">Uploading files & saving registration...</p>
+                            <p className="text-[10px] text-[#D9E1EC]/60">Redirecting to WhatsApp and Payment step next</p>
+                        </div>
+                    </div>
+                )}
 
-                    {/* Eligibility Section (Step 0) */}
-                    {step === 0 && (
-                        <div className="space-y-8 animate-fade-in font-sans text-xs">
-                            <div className="border-b border-zinc-150 pb-4">
-                                <span className="text-[10px] tracking-[0.25em] text-gold-champagne font-bold uppercase block">
-                                    FIRST EVALUATION STAGE
-                                </span>
-                                <h2 className="font-serif text-2xl md:text-3xl font-light text-[#111111] uppercase mt-1">
-                                    Eligibility Criteria & Checklist
-                                </h2>
-                            </div>
+                <div className="bg-[#0B2347] border border-[#D4AF37]/20 p-8 md:p-12 shadow-2xl relative">
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 font-sans">
-                                {eligibilityChecklist.map((item, idx) => (
-                                    <div key={idx} className="flex items-start gap-4 p-4 border border-zinc-200 bg-[#FAF8F3]/50">
-                                        <span className="p-1 bg-gold-champagne/10 text-gold-champagne border border-gold-champagne/20 shrink-0 mt-0.5">
-                                            <Check className="w-3.5 h-3.5" />
-                                        </span>
-                                        <div>
-                                            <h4 className="font-serif text-[15px] font-bold text-[#111111] tracking-wide uppercase">
-                                                {item.label}
-                                            </h4>
-                                            <p className="text-zinc-[650] text-[16px] font-sans mt-1 leading-relaxed">
-                                                {item.val}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Special Note */}
-                            <div className="p-6 bg-gold-champagne/5 border border-gold-champagne/20 font-sans">
-                                <div className="flex gap-3">
-                                    <ShieldAlert className="w-5 h-5 text-gold-champagne shrink-0" />
-                                    <div>
-                                        <h4 className="font-serif text-[15px] font-bold text-gold-champagne uppercase">
-                                            Special Selection Note
-                                        </h4>
-                                        <p className="text-zinc-550 text-[16px] mt-1 leading-relaxed">
-                                            NINTM celebrates diversity and welcomes aspiring models from different backgrounds, profiles, and cities across India. Selection is based purely on projection, confidence, poise, and photogenic traits.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-6 text-right">
-                                <button
-                                    type="button"
-                                    onClick={() => setStep(1)}
-                                    className="px-8 py-3 bg-gold-champagne hover:bg-black text-white transition-colors font-sans font-bold text-[10px] tracking-[0.2em] inline-flex items-center gap-2 uppercase"
-                                >
-                                    START REGISTRATION <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
+                    {errorMsg && (
+                        <div className="mb-6 p-4 bg-[#8B1E2D]/20 border border-[#8B1E2D]/40 text-red-200 text-xs flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                            <span>{errorMsg}</span>
                         </div>
                     )}
 
-                    {/* STEP 1: Basic details */}
-                    {step === 1 && (
-                        <div className="space-y-8 animate-fade-in font-sans text-xs">
-                            <div className="border-b border-zinc-150 pb-4">
-                                <span className="text-[10px] tracking-[0.2em] text-zinc-400 font-bold uppercase block">
-                                    STEP 1 OF 7
-                                </span>
-                                <h3 className="font-serif text-2xl text-[#111111] uppercase font-bold mt-1">
-                                    Basic Personal Details
-                                </h3>
-                            </div>
+                    <form onSubmit={handleSubmit} className="space-y-8 font-sans text-xs">
+
+                        {/* Section 1: Personal Coordinates */}
+                        <div>
+                            <h3 className="font-serif text-[#D4AF37] text-lg uppercase tracking-wide border-b border-[#D4AF37]/15 pb-2 mb-6">
+                                1. Personal Details
+                            </h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
                                         Full Name *
                                     </label>
                                     <input
                                         type="text"
-                                        name="fullName"
-                                        value={formData.fullName}
+                                        name="name"
+                                        value={formInputs.name}
                                         onChange={handleInputChange}
-                                        placeholder="Enter your legal full name"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
+                                        placeholder="Legal Name"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
                                         required
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
                                         Instagram Handle *
                                     </label>
-                                    <div className="relative">
-                                        <span className="absolute left-4 top-3 text-zinc-400 text-xs">@</span>
-                                        <input
-                                            type="text"
-                                            name="instagramUsername"
-                                            value={formData.instagramUsername}
-                                            onChange={handleInputChange}
-                                            placeholder="username"
-                                            className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs pl-8 pr-4 py-3 outline-none"
-                                            required
-                                        />
-                                    </div>
+                                    <input
+                                        type="text"
+                                        name="instagramUsername"
+                                        value={formInputs.instagramUsername}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. username (do not include @)"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
+                                        required
+                                    />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
                                         Date of Birth *
                                     </label>
                                     <input
                                         type="date"
-                                        name="dob"
-                                        value={formData.dob}
+                                        name="dateOfBirth"
+                                        value={formInputs.dateOfBirth}
                                         onChange={handleInputChange}
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
                                         required
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Gender Group
-                                    </label>
-                                    <select
-                                        name="gender"
-                                        value={formData.gender}
-                                        onChange={handleInputChange}
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    >
-                                        <option value="Female">Female</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Other">Other / Non-Binary</option>
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Marital Status
-                                    </label>
-                                    <select
-                                        name="maritalStatus"
-                                        value={formData.maritalStatus}
-                                        onChange={handleInputChange}
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    >
-                                        <option value="Unmarried">Unmarried</option>
-                                        <option value="Married">Married</option>
-                                        <option value="Divorced">Divorced / Widowed</option>
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Email Address *
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
+                                        Email *
                                     </label>
                                     <input
                                         type="email"
                                         name="email"
-                                        value={formData.email}
+                                        value={formInputs.email}
                                         onChange={handleInputChange}
-                                        placeholder="name@domain.com"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
+                                        placeholder="name@email.com"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
                                         required
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-4 gap-2 col-span-1 md:col-span-2">
-                                    <div className="space-y-2 col-span-1">
-                                        <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                            Code
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="countryCode"
-                                            value={formData.countryCode}
-                                            onChange={handleInputChange}
-                                            placeholder="+91"
-                                            className="w-full bg-[#FAF8F3]/50 border border-zinc-200 text-center focus:border-gold-champagne text-[#111111] text-xs py-3 outline-none"
-                                        />
-                                    </div>
-                                    <div className="space-y-2 col-span-3">
-                                        <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                            Phone Number *
-                                        </label>
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            value={formData.phone}
-                                            onChange={handleInputChange}
-                                            placeholder="Primary Mobile Number"
-                                            className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                            required
-                                        />
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
+                                        Phone Number *
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={formInputs.phone}
+                                        onChange={handleInputChange}
+                                        placeholder="Primary Contact Number"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
+                                        required
+                                    />
                                 </div>
-                            </div>
 
-                            <div className="pt-6 border-t border-zinc-200 flex justify-between">
-                                <button
-                                    type="button"
-                                    onClick={() => setStep(0)}
-                                    className="px-6 py-2.5 border border-zinc-250 hover:border-[#111111] text-zinc-500 hover:text-[#111111] transition-all font-sans text-xs tracking-wider"
-                                >
-                                    ← BACK TO ELIGIBILITY
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleNextStep}
-                                    className="px-8 py-3 bg-gold-champagne hover:bg-black text-white transition-colors font-sans font-bold text-[10px] tracking-[0.2em] inline-flex items-center gap-2 uppercase"
-                                >
-                                    CONTINUE <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
+                                        WhatsApp Number *
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        name="whatsapp"
+                                        value={formInputs.whatsapp}
+                                        onChange={handleInputChange}
+                                        placeholder="WhatsApp Number"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
+                                        required
+                                    />
+                                </div>
 
-                    {/* STEP 2: Professional Details */}
-                    {step === 2 && (
-                        <div className="space-y-8 animate-fade-in font-sans text-xs">
-                            <div className="border-b border-zinc-150 pb-4">
-                                <span className="text-[10px] tracking-[0.2em] text-zinc-400 font-bold uppercase block">
-                                    STEP 2 OF 7
-                                </span>
-                                <h3 className="font-serif text-2xl text-[#111111] uppercase font-bold mt-1">
-                                    Professional & Body Metrics
-                                </h3>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Height in CM (e.g. 172) *
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
+                                        Height in CM *
                                     </label>
                                     <input
                                         type="number"
                                         name="height"
-                                        value={formData.height}
+                                        value={formInputs.height}
                                         onChange={handleInputChange}
-                                        placeholder="Height (CM)"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
+                                        placeholder="e.g. 172"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
                                         required
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Dress Size
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
+                                        State *
                                     </label>
                                     <select
-                                        name="dressSize"
-                                        value={formData.dressSize}
+                                        name="state"
+                                        value={formInputs.state}
                                         onChange={handleInputChange}
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
+                                        required
                                     >
-                                        <option value="XS">Extra Small (XS)</option>
-                                        <option value="S">Small (S)</option>
-                                        <option value="M">Medium (M)</option>
-                                        <option value="L">Large (L)</option>
-                                        <option value="XL">Extra Large (XL)</option>
+                                        <option value="" disabled className="text-gray-400">Select candidate state</option>
+                                        {indianStates.map((st) => (
+                                            <option key={st} value={st} className="bg-[#081C3A] text-white">{st}</option>
+                                        ))}
                                     </select>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Vital Stats (Bust-Waist-Hips, e.g. 34-26-36)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="vitalStats"
-                                        value={formData.vitalStats}
-                                        onChange={handleInputChange}
-                                        placeholder="e.g. 34-26-36"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Modeling Experience
-                                    </label>
-                                    <select
-                                        name="experience"
-                                        value={formData.experience}
-                                        onChange={handleInputChange}
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    >
-                                        <option value="Fresher">Fresher / Aspiring</option>
-                                        <option value="Experienced">Experienced Model</option>
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Current Profession
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="profession"
-                                        value={formData.profession}
-                                        onChange={handleInputChange}
-                                        placeholder="e.g. Student, Actor, Influencer"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Audition City *
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
+                                        City *
                                     </label>
                                     <input
                                         type="text"
                                         name="city"
-                                        value={formData.city}
+                                        value={formInputs.city}
                                         onChange={handleInputChange}
-                                        placeholder="e.g. Chandigarh, Gurugram"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
+                                        placeholder="Casting Audition City"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
                                         required
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Primary Audition State
-                                    </label>
-                                    <select
-                                        name="state"
-                                        value={formData.state}
-                                        onChange={handleInputChange}
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    >
-                                        {northStates.map((st) => (
-                                            <option key={st} value={st}>{st}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Country
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] uppercase tracking-wider text-[#D9E1EC]/60 font-bold block">
+                                        Pincode *
                                     </label>
                                     <input
                                         type="text"
-                                        name="country"
-                                        value={formData.country}
+                                        name="pincode"
+                                        value={formInputs.pincode}
                                         onChange={handleInputChange}
-                                        className="w-full bg-zinc-100 border border-zinc-200 text-[#111111] text-xs px-4 py-3 outline-none opacity-60"
-                                        disabled
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-zinc-200 flex justify-between">
-                                <button
-                                    type="button"
-                                    onClick={handlePrevStep}
-                                    className="px-6 py-2.5 border border-zinc-250 text-zinc-500 hover:text-[#111111] transition-all font-sans text-xs tracking-wider"
-                                >
-                                    ← PREVIOUS
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleNextStep}
-                                    className="px-8 py-3 bg-gold-champagne hover:bg-black text-white transition-colors font-sans font-bold text-[10px] tracking-[0.2em] inline-flex items-center gap-2 uppercase"
-                                >
-                                    CONTINUE <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 3: Address logs */}
-                    {step === 3 && (
-                        <div className="space-y-8 animate-fade-in font-sans text-xs">
-                            <div className="border-b border-zinc-150 pb-4">
-                                <span className="text-[10px] tracking-[0.2em] text-zinc-400 font-bold uppercase block">
-                                    STEP 3 OF 7
-                                </span>
-                                <h3 className="font-serif text-2xl text-[#111111] uppercase font-bold mt-1">
-                                    Mailing Address Details
-                                </h3>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Street Address *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="streetAddress"
-                                        value={formData.streetAddress}
-                                        onChange={handleInputChange}
-                                        placeholder="Apartment, Suite, Street name"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
+                                        placeholder="6-digit PIN"
+                                        className="w-full bg-[#081C3A] border border-[#D4AF37]/20 focus:border-[#D4AF37] text-white text-xs px-4 py-3 outline-none"
                                         required
                                     />
                                 </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Street Address Line 2
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="streetAddress2"
-                                        value={formData.streetAddress2}
-                                        onChange={handleInputChange}
-                                        placeholder="Floor details, landmark (optional)"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                            Postal / ZIP Code *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="postalCode"
-                                            value={formData.postalCode}
-                                            onChange={handleInputChange}
-                                            placeholder="ZIP Code"
-                                            className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                            State / UT
-                                        </label>
-                                        <select
-                                            name="addressState"
-                                            value={formData.addressState}
-                                            onChange={handleInputChange}
-                                            className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                        >
-                                            {northStates.map((st) => (
-                                                <option key={st} value={st}>{st}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-zinc-200 flex justify-between">
-                                <button
-                                    type="button"
-                                    onClick={handlePrevStep}
-                                    className="px-6 py-2.5 border border-zinc-250 text-zinc-500 hover:text-[#111111] transition-all font-sans text-xs tracking-wider"
-                                >
-                                    ← PREVIOUS
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleNextStep}
-                                    className="px-8 py-3 bg-gold-champagne hover:bg-black text-white transition-colors font-sans font-bold text-[10px] tracking-[0.2em] inline-flex items-center gap-2 uppercase"
-                                >
-                                    CONTINUE <ArrowRight className="w-4 h-4" />
-                                </button>
                             </div>
                         </div>
-                    )}
 
-                    {/* STEP 4: Application Details / Wildcard */}
-                    {step === 4 && (
-                        <div className="space-y-8 animate-fade-in font-sans text-xs">
-                            <div className="border-b border-zinc-150 pb-4">
-                                <span className="text-[10px] tracking-[0.2em] text-zinc-400 font-bold uppercase block">
-                                    STEP 4 OF 7
-                                </span>
-                                <h3 className="font-serif text-2xl text-[#111111] uppercase font-bold mt-1">
-                                    Additional State & Wildcard Options
-                                </h3>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div className="p-4 bg-[#FAF8F3] border border-zinc-200 text-zinc-650 text-xs font-sans leading-relaxed">
-                                    <span className="text-gold-champagne font-bold block uppercase mb-1">
-                                        What is a Wildcard Entry?
-                                    </span>
-                                    Wildcard entries allow models who fall slightly outside the core parameters of regional selections or missed physical auditions. If you wish to apply for multiple states simultaneously or justify a wildcard screen, state your reasonings below.
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block font-sans">
-                                        Additional State or Wildcard Application Note
-                                    </label>
-                                    <textarea
-                                        name="wildcardNotes"
-                                        value={formData.wildcardNotes}
-                                        onChange={handleInputChange}
-                                        rows="5"
-                                        placeholder="If you are applying for additional states or online wildcard slots, mention dates, state preferences, or justification here..."
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none font-sans"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-zinc-200 flex justify-between">
-                                <button
-                                    type="button"
-                                    onClick={handlePrevStep}
-                                    className="px-6 py-2.5 border border-zinc-250 text-zinc-500 hover:text-[#111111] transition-all font-sans text-xs tracking-wider"
-                                >
-                                    ← PREVIOUS
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleNextStep}
-                                    className="px-8 py-3 bg-gold-champagne hover:bg-black text-white transition-colors font-sans font-bold text-[10px] tracking-[0.2em] inline-flex items-center gap-2 uppercase"
-                                >
-                                    CONTINUE <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 5: Documents */}
-                    {step === 5 && (
-                        <div className="space-y-8 animate-fade-in font-sans text-xs">
-                            <div className="border-b border-zinc-150 pb-4">
-                                <span className="text-[10px] tracking-[0.2em] text-zinc-400 font-bold uppercase block">
-                                    STEP 5 OF 7
-                                </span>
-                                <h3 className="font-serif text-2xl text-[#111111] uppercase font-bold mt-1">
-                                    Document & Portfolio Photo Uploads
-                                </h3>
-                            </div>
-
-                            <div className="p-4 bg-[#FAF8F3] border border-zinc-200 text-zinc-500 text-xs font-sans">
-                                <strong>Upload Guidelines:</strong> Files accepted: <strong>JPG, JPEG, PNG</strong>. Max size: <strong>5 MB per image</strong>.
-                                Please ensure high-resolution photos with natural daylight, minimal makeup, and clear styling.
-                            </div>
+                        {/* Section 2: Photo Uploads */}
+                        <div>
+                            <h3 className="font-serif text-[#D4AF37] text-lg uppercase tracking-wide border-b border-[#D4AF37]/15 pb-2 mb-2">
+                                2. Photo Uploads
+                            </h3>
+                            <p className="text-[10px] text-[#D9E1EC]/60 mb-6 font-semibold">
+                                Upload 2 photos only. Maximum 5 MB per image. Allowed formats: JPG, JPEG, PNG, WEBP.
+                            </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* ID Proof */}
-                                <div className="border border-zinc-200 p-6 flex flex-col justify-between space-y-4 bg-white">
+
+                                {/* Photo 1: Full Length */}
+                                <div className="border border-[#D4AF37]/15 p-6 bg-[#081C3A] flex flex-col justify-between space-y-4">
                                     <div>
-                                        <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                            Government ID Proof *
+                                        <label className="text-[10.5px] uppercase tracking-wider text-white font-bold block">
+                                            Full Length Photo *
                                         </label>
-                                        <p className="text-[10px] text-zinc-400 font-sans mt-0.5">
-                                            Aadhaar Card, Passport, or DL for verification.
+                                        <p className="text-[9px] text-[#D9E1EC]/40 leading-relaxed mt-0.5">
+                                            Clear, straight pose showing entire silhouette.
                                         </p>
                                     </div>
-                                    <div className="border-2 border-dashed border-zinc-200 py-6 flex flex-col items-center justify-center relative cursor-pointer hover:border-gold-champagne transition-colors bg-[#FAF8F3]/30">
-                                        <input
-                                            type="file"
-                                            accept=".jpg,.jpeg,.png"
-                                            onChange={(e) => handleFileChange(e, 'govIdName')}
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                        />
-                                        <Upload className="w-6 h-6 text-zinc-400 mb-2" />
-                                        <span className="text-xs text-zinc-500 select-none">
-                                            {formData.govIdName || 'Drag & Drop ID Proof'}
-                                        </span>
-                                    </div>
+
+                                    {previews.fullLength ? (
+                                        <div className="relative aspect-[3/4] w-full border border-[#D4AF37]/35 overflow-hidden group bg-black/40">
+                                            <Image
+                                                src={previews.fullLength}
+                                                alt="Full Length Preview"
+                                                fill
+                                                sizes="(max-width: 768px) 100vw, 400px"
+                                                className="object-contain"
+                                            />
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => fullLengthInputRef.current?.click()}
+                                                    className="px-3 py-1.5 bg-[#D4AF37] text-[#081C3A] font-bold text-[9px] uppercase tracking-wider hover:bg-white transition-colors"
+                                                >
+                                                    Replace
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemovePhoto('fullLength')}
+                                                    className="p-1.5 bg-red-600 text-white hover:bg-red-700 transition-colors"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div
+                                            onClick={() => fullLengthInputRef.current?.click()}
+                                            className="border-2 border-dashed border-[#D4AF37]/25 hover:border-[#D4AF37]/60 aspect-[3/4] cursor-pointer flex flex-col items-center justify-center bg-[#0B2347]/50 gap-2 transition-all p-4"
+                                        >
+                                            <Camera className="w-8 h-8 text-[#D4AF37]/60" />
+                                            <span className="text-[10px] text-[#D9E1EC]/60 uppercase tracking-widest font-bold">Select Full Length Image</span>
+                                            <span className="text-[9px] text-[#D9E1EC]/30">Click to upload</span>
+                                        </div>
+                                    )}
+
+                                    <input
+                                        type="file"
+                                        ref={fullLengthInputRef}
+                                        accept=".jpg,.jpeg,.png,.webp"
+                                        onChange={(e) => handleFileChange(e, 'fullLength')}
+                                        className="hidden"
+                                    />
                                 </div>
 
-                                {/* Close up */}
-                                <div className="border border-zinc-200 p-6 flex flex-col justify-between space-y-4 bg-white">
+                                {/* Photo 2: Close-Up */}
+                                <div className="border border-[#D4AF37]/15 p-6 bg-[#081C3A] flex flex-col justify-between space-y-4">
                                     <div>
-                                        <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                            Close-Up Photograph *
+                                        <label className="text-[10.5px] uppercase tracking-wider text-white font-bold block">
+                                            Close-Up Photo *
                                         </label>
-                                        <p className="text-[10px] text-zinc-400 font-sans mt-0.5">
-                                            Clear headshot focusing on facial features.
+                                        <p className="text-[9px] text-[#D9E1EC]/40 leading-relaxed mt-0.5">
+                                            Headshot focusing on features. Flat daylight preferred.
                                         </p>
                                     </div>
-                                    <div className="border-2 border-dashed border-zinc-200 py-6 flex flex-col items-center justify-center relative cursor-pointer hover:border-gold-champagne transition-colors bg-[#FAF8F3]/30">
-                                        <input
-                                            type="file"
-                                            accept=".jpg,.jpeg,.png"
-                                            onChange={(e) => handleFileChange(e, 'closeUpName')}
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                        />
-                                        <Upload className="w-6 h-6 text-zinc-400 mb-2" />
-                                        <span className="text-xs text-zinc-500 select-none">
-                                            {formData.closeUpName || 'Drag & Drop Photograph'}
-                                        </span>
-                                    </div>
-                                </div>
 
-                                {/* Mid shot */}
-                                <div className="border border-zinc-200 p-6 flex flex-col justify-between space-y-4 bg-white">
-                                    <div>
-                                        <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                            Mid-Shot Photograph *
-                                        </label>
-                                        <p className="text-[10px] text-zinc-400 font-sans mt-0.5">
-                                            Shot till waist displaying basic silhouette.
-                                        </p>
-                                    </div>
-                                    <div className="border-2 border-dashed border-zinc-200 py-6 flex flex-col items-center justify-center relative cursor-pointer hover:border-gold-champagne transition-colors bg-[#FAF8F3]/30">
-                                        <input
-                                            type="file"
-                                            accept=".jpg,.jpeg,.png"
-                                            onChange={(e) => handleFileChange(e, 'midShotName')}
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                        />
-                                        <Upload className="w-6 h-6 text-zinc-400 mb-2" />
-                                        <span className="text-xs text-zinc-500 select-none">
-                                            {formData.midShotName || 'Drag & Drop Photograph'}
-                                        </span>
-                                    </div>
-                                </div>
+                                    {previews.closeUp ? (
+                                        <div className="relative aspect-[3/4] w-full border border-[#D4AF37]/35 overflow-hidden group bg-black/40">
+                                            <Image
+                                                src={previews.closeUp}
+                                                alt="Close Up Preview"
+                                                fill
+                                                sizes="(max-width: 768px) 100vw, 400px"
+                                                className="object-contain"
+                                            />
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => closeUpInputRef.current?.click()}
+                                                    className="px-3 py-1.5 bg-[#D4AF37] text-[#081C3A] font-bold text-[9px] uppercase tracking-wider hover:bg-white transition-colors"
+                                                >
+                                                    Replace
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemovePhoto('closeUp')}
+                                                    className="p-1.5 bg-red-600 text-white hover:bg-red-700 transition-colors"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div
+                                            onClick={() => closeUpInputRef.current?.click()}
+                                            className="border-2 border-dashed border-[#D4AF37]/25 hover:border-[#D4AF37]/60 aspect-[3/4] cursor-pointer flex flex-col items-center justify-center bg-[#0B2347]/50 gap-2 transition-all p-4"
+                                        >
+                                            <Camera className="w-8 h-8 text-[#D4AF37]/60" />
+                                            <span className="text-[10px] text-[#D9E1EC]/60 uppercase tracking-widest font-bold">Select Close-Up Image</span>
+                                            <span className="text-[9px] text-[#D9E1EC]/30">Click to upload</span>
+                                        </div>
+                                    )}
 
-                                {/* Full length */}
-                                <div className="border border-zinc-200 p-6 flex flex-col justify-between space-y-4 bg-white">
-                                    <div>
-                                        <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                            Full-Length Photograph *
-                                        </label>
-                                        <p className="text-[10px] text-zinc-400 font-sans mt-0.5">
-                                            Model standing straight showing proportions.
-                                        </p>
-                                    </div>
-                                    <div className="border-2 border-dashed border-zinc-200 py-6 flex flex-col items-center justify-center relative cursor-pointer hover:border-gold-champagne transition-colors bg-[#FAF8F3]/30">
-                                        <input
-                                            type="file"
-                                            accept=".jpg,.jpeg,.png"
-                                            onChange={(e) => handleFileChange(e, 'fullLengthName')}
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                        />
-                                        <Upload className="w-6 h-6 text-zinc-400 mb-2" />
-                                        <span className="text-xs text-zinc-500 select-none">
-                                            {formData.fullLengthName || 'Drag & Drop Photograph'}
-                                        </span>
-                                    </div>
+                                    <input
+                                        type="file"
+                                        ref={closeUpInputRef}
+                                        accept=".jpg,.jpeg,.png,.webp"
+                                        onChange={(e) => handleFileChange(e, 'closeUp')}
+                                        className="hidden"
+                                    />
                                 </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-zinc-200 flex justify-between">
-                                <button
-                                    type="button"
-                                    onClick={handlePrevStep}
-                                    className="px-6 py-2.5 border border-zinc-250 text-zinc-500 hover:text-[#111111] transition-all font-sans text-xs tracking-wider"
-                                >
-                                    ← PREVIOUS
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (!formData.govIdName || !formData.closeUpName || !formData.midShotName || !formData.fullLengthName) {
-                                            alert('Please select and upload all required documents and photographs.');
-                                            return;
-                                        }
-                                        setStep(6);
-                                    }}
-                                    className="px-8 py-3 bg-gold-champagne hover:bg-black text-white transition-colors font-sans font-bold text-[10px] tracking-[0.2em] inline-flex items-center gap-2 uppercase"
-                                >
-                                    CONTINUE <ArrowRight className="w-4 h-4" />
-                                </button>
                             </div>
                         </div>
-                    )}
 
-                    {/* STEP 6: Social links */}
-                    {step === 6 && (
-                        <div className="space-y-8 animate-fade-in font-sans text-xs">
-                            <div className="border-b border-zinc-150 pb-4">
-                                <span className="text-[10px] tracking-[0.2em] text-zinc-400 font-bold uppercase block">
-                                    STEP 6 OF 7
-                                </span>
-                                <h3 className="font-serif text-2xl text-[#111111] uppercase font-bold mt-1">
-                                    Social Media & Portfolio Channels
-                                </h3>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Instagram Profile Link
-                                    </label>
-                                    <input
-                                        type="url"
-                                        name="instagram"
-                                        value={formData.instagram}
-                                        onChange={handleInputChange}
-                                        placeholder="https://instagram.com/yourhandle"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Facebook Profile Link
-                                    </label>
-                                    <input
-                                        type="url"
-                                        name="facebook"
-                                        value={formData.facebook}
-                                        onChange={handleInputChange}
-                                        placeholder="https://facebook.com/username"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Portfolio Website (optional)
-                                    </label>
-                                    <input
-                                        type="url"
-                                        name="portfolioWebsite"
-                                        value={formData.portfolioWebsite}
-                                        onChange={handleInputChange}
-                                        placeholder="https://www.yourportfolio.com"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">
-                                        Other Social Media Link
-                                    </label>
-                                    <input
-                                        type="url"
-                                        name="otherSocial"
-                                        value={formData.otherSocial}
-                                        onChange={handleInputChange}
-                                        placeholder="e.g. YouTube profile link"
-                                        className="w-full bg-[#FAF8F3]/50 border border-zinc-200 focus:border-gold-champagne text-[#111111] text-xs px-4 py-3 outline-none"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-zinc-200 flex justify-between">
-                                <button
-                                    type="button"
-                                    onClick={handlePrevStep}
-                                    className="px-6 py-2.5 border border-zinc-250 text-zinc-500 hover:text-[#111111] transition-all font-sans text-xs tracking-wider"
-                                >
-                                    ← PREVIOUS
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setStep(7)}
-                                    className="px-8 py-3 bg-gold-champagne hover:bg-black text-white transition-colors font-sans font-bold text-[10px] tracking-[0.2em] inline-flex items-center gap-2 uppercase"
-                                >
-                                    CONTINUE <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
+                        {/* Submit Button Section */}
+                        <div className="pt-6 border-t border-[#D4AF37]/20 flex flex-col items-center">
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="px-12 py-4 bg-[#D4AF37] text-[#081C3A] hover:bg-[#081C3A] hover:text-[#D4AF37] hover:border-[#D4AF37] border border-transparent transition-all font-sans font-bold text-xs tracking-[0.25em] uppercase shadow-lg duration-300"
+                            >
+                                {isSubmitting ? 'PROCESSING REGISTRATION...' : 'REGISTER NOW'}
+                            </button>
                         </div>
-                    )}
-
-                    {/* STEP 7: Agreement & Checkout */}
-                    {step === 7 && (
-                        <form onSubmit={handleSubmitRegistration} className="space-y-8 animate-fade-in font-sans text-xs">
-                            <div className="border-b border-zinc-150 pb-4">
-                                <span className="text-[10px] tracking-[0.2em] text-zinc-400 font-bold uppercase block">
-                                    STEP 7 OF 7
-                                </span>
-                                <h3 className="font-serif text-2xl text-[#111111] uppercase font-bold mt-1">
-                                    Agreement Details & Fees Calculation
-                                </h3>
-                            </div>
-
-                            {/* Review summary cards */}
-                            <div className="space-y-4">
-                                <h4 className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold">
-                                    Summary Review:
-                                </h4>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs bg-[#FAF8F3] border border-zinc-200 p-6">
-                                    <div>
-                                        <span className="text-zinc-[450] block font-bold">FULL NAME</span>
-                                        <span className="text-[#111111] font-bold block">{formData.fullName}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-zinc-[450] block font-bold">AUDITION STATE</span>
-                                        <span className="text-gold-champagne font-bold block">{formData.state}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-zinc-[450] block font-bold">HEIGHT</span>
-                                        <span className="text-[#111111] block">{formData.height} CM</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-zinc-[450] block font-bold">EMAIL ID</span>
-                                        <span className="text-[#111111] block truncate">{formData.email}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Agreement Checkboxes */}
-                            <div className="border border-zinc-200 bg-white p-6 space-y-4">
-                                <h4 className="font-serif text-xs font-bold text-[#111111] uppercase flex items-center gap-2">
-                                    <FileText className="w-4 h-4 text-gold-champagne shrink-0" />
-                                    Model Agreement Consent
-                                </h4>
-
-                                <div className="flex items-start gap-3">
-                                    <input
-                                        type="checkbox"
-                                        id="agreed"
-                                        name="agreed"
-                                        checked={formData.agreed}
-                                        onChange={handleInputChange}
-                                        className="mt-1 border border-zinc-300 accent-gold-champagne bg-white"
-                                        required
-                                    />
-                                    <label htmlFor="agreed" className="text-[11px] text-zinc-500 leading-relaxed cursor-pointer select-none font-normal">
-                                        I have read and agree to the{' '}
-                                        <Link href="/legal/terms" target="_blank" className="text-gold-champagne hover:underline font-semibold">
-                                            Eligibility Criteria
-                                        </Link>,{' '}
-                                        <Link href="/legal/terms" target="_blank" className="text-gold-champagne hover:underline font-semibold">
-                                            Terms & Conditions
-                                        </Link>,{' '}
-                                        <Link href="/legal/privacy" target="_blank" className="text-gold-champagne hover:underline font-semibold">
-                                            Privacy Policy
-                                        </Link>,{' '}
-                                        <Link href="/legal/model-agreement" target="_blank" className="text-gold-champagne hover:underline font-semibold">
-                                            Model Agreement
-                                        </Link>,{' '}
-                                        <Link href="/legal/refund" target="_blank" className="text-gold-champagne hover:underline font-semibold">
-                                            Refund Policy
-                                        </Link>, and{' '}
-                                        <Link href="/legal/cancellation" target="_blank" className="text-gold-champagne hover:underline font-semibold">
-                                            Cancellation Policy
-                                        </Link> of North India&apos;s Next Top Model 2026.
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Fees table display */}
-                            <div className="border border-gold-champagne/30 bg-[#FAF8F3] p-8 max-w-sm ml-auto">
-                                <span className="text-[9px] tracking-[0.25em] text-gold-champagne font-bold uppercase block mb-1">
-                                    OFFICIAL SCREENING FEE
-                                </span>
-                                <h4 className="font-serif text-sm font-bold text-[#111111] uppercase mb-4">
-                                    Application Fee Summary
-                                </h4>
-
-                                <div className="space-y-2 text-xs font-sans text-zinc-500">
-                                    <div className="flex justify-between">
-                                        <span>Base Processing fee:</span>
-                                        <span className="text-[#111111] font-bold font-mono">₹{feeBase.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between border-b border-zinc-200 pb-2">
-                                        <span>GST (18% applicable):</span>
-                                        <span className="text-[#111111] font-mono">₹{gstAmount.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between text-xs pt-2 text-[#111111] font-bold">
-                                        <span>Total Amount Payable:</span>
-                                        <span className="text-gold-champagne font-mono">₹{finalTotalAmount.toLocaleString()}</span>
-                                    </div>
-                                </div>
-
-                                <p className="text-[9px] text-zinc-400 font-sans leading-relaxed mt-4 italic">
-                                    * Fees are strictly non-refundable and include entry to castings, training guides, and evaluation dossier reports.
-                                </p>
-
-                                {/* Gateway config picker */}
-                                <div className="mt-6 pt-4 border-t border-zinc-200">
-                                    <label className="text-[9px] tracking-wider text-zinc-500 font-bold uppercase block mb-2">
-                                        Select Simulated Gateway:
-                                    </label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {['Razorpay', 'Cashfree', 'PayU'].map((gw) => (
-                                            <button
-                                                key={gw}
-                                                type="button"
-                                                onClick={() => setSelectedGateway(gw)}
-                                                className={`py-2 text-[9px] font-sans font-bold tracking-wider border rounded-none transition-all ${selectedGateway === gw
-                                                    ? 'border-gold-champagne bg-gold-champagne text-white'
-                                                    : 'border-zinc-200 text-zinc-500 bg-white hover:border-[#111111]'
-                                                    }`}
-                                            >
-                                                {gw}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Action buttons */}
-                            <div className="pt-6 border-t border-zinc-200 flex justify-between items-center">
-                                <button
-                                    type="button"
-                                    onClick={handlePrevStep}
-                                    className="px-6 py-2.5 border border-zinc-250 text-zinc-500 hover:text-[#111111] transition-all font-sans text-xs tracking-wider"
-                                    disabled={isSubmitting}
-                                >
-                                    ← PREVIOUS STEP
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="px-8 py-3.5 bg-gold-champagne text-white hover:bg-[#111111] transition-all font-sans font-bold text-[10px] tracking-[0.25em] inline-flex items-center gap-2 uppercase"
-                                >
-                                    {isSubmitting ? 'PROCESSING...' : 'PROCEED TO MOCK PAYMENT'} <CreditCard className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </form>
-                    )}
+                    </form>
 
                 </div>
             </main>
