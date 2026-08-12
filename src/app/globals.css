@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold-champagne: #B8903F;
+  --color-gold-luxury: #C9A45C;
+  --color-gold-light: #E6D2A2;
+
+  --color-luxury-black: #111111;
+  --color-luxury-soft-black: #1A1A1A;
+
+  --color-bg-white: #FFFFFF;
+  --color-bg-ivory: #FAF8F3;
+  --color-bg-warm-white: #F7F5F0;
+
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), sans-serif;
+}
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #111111;
+}
+
+body {
+  background-color: #FFFFFF;
+  color: #111111;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+p {
+  font-size: 16px !important;
+  line-height: 1.75 !important;
+}
+
+/* Custom smooth animations & scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Light styling scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF8F3;
+  border-left: 1px solid #EAEAEA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #EAEAEA;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8903F;
+}
+
+/* Luxury keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-up {
+  animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Premium Light Editorial Glassmorphism */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(184, 144, 63, 0.15);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(250, 248, 243, 0.95);
+  border: 1px solid rgba(184, 144, 63, 0.35);
+  box-shadow: 0px 8px 30px rgba(184, 144, 63, 0.08);
+}
