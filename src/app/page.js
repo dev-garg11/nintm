@@ -293,7 +293,7 @@ Thank you.`;
               </svg>
             </div>
             <div className="font-serif text-4xl lg:text-5xl font-light text-[#D4AF37] tracking-wide">
-              ₹15 L+
+              ₹15 Lacs
             </div>
             <div className="text-[10px] tracking-[0.25em] uppercase text-white font-bold font-sans mt-0.5">
               WINNER WORK CONTRACT
