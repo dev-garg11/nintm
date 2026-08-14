@@ -809,6 +809,33 @@
       "createdAt": "2026-08-12T13:04:23.459Z",
       "updatedAt": "2026-08-12T13:04:23.459Z",
       "applicationStatus": "Payment Pending"
+    },
+    {
+      "registrationId": "NINTM-882595",
+      "id": "NINTM-882595",
+      "name": "sbdh",
+      "fullName": "sbdh",
+      "instagramUsername": "anbd",
+      "dateOfBirth": "2016-02-13",
+      "dob": "2016-02-13",
+      "email": "skhbxsah@gmail.com",
+      "phone": "1234567890",
+      "whatsapp": "1234567890",
+      "height": "417",
+      "state": "Odisha",
+      "city": "Chandigarh",
+      "pincode": "160030",
+      "fullLengthPhoto": "/uploads/NINTM-882595-fullLength.jpeg",
+      "closeUpPhoto": "/uploads/NINTM-882595-closeUp.jpeg",
+      "paymentStatus": "PENDING",
+      "paymentAmount": 8258.82,
+      "razorpayOrderId": "order_TPHfg9E69uJYNZ",
+      "razorpayPaymentId": "",
+      "razorpaySignature": "",
+      "paymentDate": "",
+      "createdAt": "2026-08-13T14:10:27.015Z",
+      "updatedAt": "2026-08-13T14:17:27.064Z",
+      "applicationStatus": "Payment Pending"
     }
   ]
 }

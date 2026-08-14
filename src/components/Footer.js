@@ -114,7 +114,7 @@ export default function Footer() {
             {/* Note about placeholders */}
             <div className="max-w-7xl mx-auto px-6 md:px-12 border-t border-[#D4AF37]/20 py-6 text-[10px] text-[#D9E1EC]/50 flex flex-col gap-2">
                 <p>
-                    <strong>Legal Disclaimer Note:</strong> Registration fee details (₹6,999 + applicable GST), refund policies, model contracts, company credentials (NINTM FASHION AND MODEL HUNT PRIVATE LIMITED, Sector 43 Gurugram), and official payment configurations are static mock representations. Official business setup and legal transactions are pending final certifications.
+                    <strong>Legal Disclaimer Note:</strong> Registration fee details (₹699 + applicable GST), refund policies, model contracts, company credentials (NINTM FASHION AND MODEL HUNT PRIVATE LIMITED, Sector 43 Gurugram), and official payment configurations are static mock representations. Official business setup and legal transactions are pending final certifications.
                 </p>
             </div>
 

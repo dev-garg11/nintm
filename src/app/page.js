@@ -129,7 +129,7 @@ Thank you.`;
             <div className="absolute -top-8 -left-8 w-[320px] h-[320px] rounded-full border border-gold-champagne/15 pointer-events-none z-0" />
             <div className="relative w-full h-full overflow-hidden z-10">
               <Image
-                src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800"
+                src="/uploads/girl.png"
                 alt="NINTM Female High-End Model"
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 30vw, 25vw"
@@ -219,7 +219,7 @@ Thank you.`;
             <div className="absolute -bottom-8 -right-8 w-[320px] h-[320px] rounded-full border border-gold-champagne/15 pointer-events-none z-0" />
             <div className="relative w-full h-full overflow-hidden z-10">
               <Image
-                src="https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=800"
+                src="/uploads/Malemodel.jpeg"
                 alt="NINTM Male High-End Model"
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 30vw, 25vw"
@@ -258,7 +258,7 @@ Thank you.`;
               SINCE 2012
             </div>
             <div className="text-[10px] text-[#D9E1EC] font-sans mt-0.5 font-normal">
-              12+ Years of Legacy
+              14 Years of Legacy
             </div>
           </div>
 
@@ -313,7 +313,7 @@ Thank you.`;
               </svg>
             </div>
             <div className="font-serif text-4xl lg:text-5xl font-light text-[#D4AF37] tracking-wide">
-              DEC &apos;26
+              DEC &apos;2026
             </div>
             <div className="text-[10px] tracking-[0.25em] uppercase text-white font-bold font-sans mt-0.5">
               DECEMBER 2026
