@@ -34,6 +34,46 @@ export default function Home() {
     message: '',
   });
 
+  // Two independent components: one for girls, one for boys.
+  // Each has its own image+name pair, so the name always changes together with its image.
+  const girlStars = [
+    { src: "/uploads/Sara gurpal.jpeg", name: "Sara Gurpal" },
+    { src: "/uploads/Sabby Suri.jpeg", name: "Sabby Suri" },
+    { src: "/uploads/jasmin.jpeg", name: "Jasmine Kaur" },
+    { src: "/uploads/sara kaur.jpeg", name: "Sara Gurpal" },
+  ];
+
+  const boyStars = [
+    { src: "/uploads/man.jpg.jpeg", name: "Aamir" },
+    { src: "/uploads/Jojo singh.jpeg", name: "Jojo Singh" },
+  ];
+
+  const [currentGirl, setCurrentGirl] = useState(0);
+  const [currentBoy, setCurrentBoy] = useState(0);
+
+  // Girls card rotates on its own timer.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentGirl((prev) => (prev + 1) % girlStars.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Boys card rotates on its own timer too, but offset so it changes
+  // a beat after the girls card — not at the same moment.
+  useEffect(() => {
+    let interval;
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        setCurrentBoy((prev) => (prev + 1) % boyStars.length);
+      }, 2500);
+    }, 1250);
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    };
+  }, []);
+
   const toggleFaq = (index) => {
     if (openFaq === index) {
       setOpenFaq(null);
@@ -84,8 +124,6 @@ Thank you.`;
     const whatsappUrl = `https://wa.me/918626000002?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
-
-
 
   const faqs = [
     { q: "How can I apply?", a: "Go to the Become a Model page, complete the multi-step registration form with your physical details, attach your Government ID proof and photoshoots, and complete the digital application fee." },
@@ -261,6 +299,7 @@ Thank you.`;
               14 Years of Legacy
             </div>
           </div>
+
           {/* Stat 3: 15L+ */}
           <div className="flex flex-col items-center space-y-2.5 text-center pt-6 md:pt-0 pb-6 md:pb-0">
             <div className="text-[#D4AF37]">
@@ -298,6 +337,85 @@ Thank you.`;
             </div>
             <div className="text-[10px] text-[#D9E1EC] font-sans mt-0.5 font-normal">
               Grand Finale
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Our Iconic Stars — 3 synced cards: image + name change together */}
+      <section className="bg-[#06162F] py-20 px-6 md:px-10 text-center border-y border-[#D4AF37]/20">
+        <span className="text-[10px] tracking-[0.3em] text-[#D4AF37] font-extrabold uppercase font-sans block mb-3">
+          OUR TALENT
+        </span>
+        <h2 className="font-serif text-3xl md:text-5xl font-light text-[#D4AF37] uppercase tracking-wide">
+          
+          Our iconic stars, rising from our legacy to shine on the global stage.
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
+
+          {/* Component 1: Girls — true crossfade, old image/name fades out as the next fades in on top of it */}
+          <div className="flex flex-col items-center">
+            <span className="text-[9px] tracking-[0.3em] text-[#D9E1EC]/60 font-bold uppercase font-sans mb-3">
+              Girls
+            </span>
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border border-[#D4AF37]/30 shadow-lg shadow-black/40 bg-[#081C3A]">
+              {girlStars.map((star, i) => (
+                <img
+                  key={star.src}
+                  src={star.src}
+                  alt={star.name}
+                  className={`absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-[1200ms] ease-in-out ${
+                    i === currentGirl ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              ))}
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#081C3A] via-[#081C3A]/60 to-transparent" />
+            </div>
+            <div className="relative mt-4 h-7 w-full">
+              {girlStars.map((star, i) => (
+                <span
+                  key={star.name + i}
+                  className={`absolute inset-0 flex items-center justify-center font-serif text-lg md:text-xl text-[#D4AF37] tracking-wide uppercase transition-opacity duration-[1200ms] ease-in-out ${
+                    i === currentGirl ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  {star.name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Component 2: Boys — same crossfade behaviour, on its own independent timer */}
+          <div className="flex flex-col items-center">
+            <span className="text-[9px] tracking-[0.3em] text-[#D9E1EC]/60 font-bold uppercase font-sans mb-3">
+              Boys
+            </span>
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border border-[#D4AF37]/30 shadow-lg shadow-black/40 bg-[#081C3A]">
+              {boyStars.map((star, i) => (
+                <img
+                  key={star.src}
+                  src={star.src}
+                  alt={star.name}
+                  className={`absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-[1200ms] ease-in-out ${
+                    i === currentBoy ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              ))}
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#081C3A] via-[#081C3A]/60 to-transparent" />
+            </div>
+            <div className="relative mt-4 h-7 w-full">
+              {boyStars.map((star, i) => (
+                <span
+                  key={star.name + i}
+                  className={`absolute inset-0 flex items-center justify-center font-serif text-lg md:text-xl text-[#D4AF37] tracking-wide uppercase transition-opacity duration-[1200ms] ease-in-out ${
+                    i === currentBoy ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  {star.name}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -422,8 +540,6 @@ Thank you.`;
           </div>
         </div>
       </section>
-
-
 
       {/* Creativatorss Section */}
       <section className="py-24 bg-[#0B2347] border-y border-[#D4AF37]/20">
