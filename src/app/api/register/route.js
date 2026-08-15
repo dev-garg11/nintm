@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { addRegistration, getRegistrations } from '@/lib/db';
-import { writeFile, mkdir } from 'fs/promises';
+import { put } from '@vercel/blob';
 import path from 'path';
 
 export async function POST(request) {
@@ -21,13 +21,11 @@ export async function POST(request) {
         const fullLengthPhoto = formData.get('fullLengthPhoto');
         const closeUpPhoto = formData.get('closeUpPhoto');
 
-        // Validation: Required Text Fields
         if (!name || !instagramUsername || !dateOfBirth || !email || !phone || !whatsapp || !height || !state || !city || !pincode) {
             return NextResponse.json({ error: 'Missing required text fields. Please complete all fields.' }, { status: 400 });
         }
 
-        // Validation: Duplicate Registration Check
-        const registrations = getRegistrations();
+        const registrations = await getRegistrations();
         const duplicate = registrations.find(r =>
             (r.email?.toLowerCase() === email.toLowerCase() || r.phone === phone) &&
             r.paymentStatus === 'PAID'
@@ -36,18 +34,15 @@ export async function POST(request) {
             return NextResponse.json({ error: 'This email address or phone number is already registered and database status is PAID.' }, { status: 400 });
         }
 
-        // Validation: Required Photo Fields
         if (!fullLengthPhoto || !closeUpPhoto || typeof fullLengthPhoto === 'string' || typeof closeUpPhoto === 'string') {
             return NextResponse.json({ error: 'Both photos (Full Length and Close-up) are required.' }, { status: 400 });
         }
 
-        // Validation: File types and sizes
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
         const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 
         const validatePhoto = (file, label) => {
             if (!allowedTypes.includes(file.type)) {
-                // Also check file name extension just in case MIME type is empty
                 const ext = path.extname(file.name).toLowerCase();
                 if (!allowedExtensions.includes(ext)) {
                     throw new Error(`${label}: Invalid file type. Allowed formats: JPG, JPEG, PNG, WEBP.`);
@@ -65,27 +60,23 @@ export async function POST(request) {
             return NextResponse.json({ error: validationErr.message }, { status: 400 });
         }
 
-        // Generate Registration ID: NINTM-XXXXXX (6 digit number)
         const randomNum = Math.floor(100000 + Math.random() * 900000);
         const registrationId = `NINTM-${randomNum}`;
 
-        // Ensure upload directory exists
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-        await mkdir(uploadDir, { recursive: true });
-
-        // Save Full Length Photo
+        // Upload Full Length Photo to Vercel Blob
         const fullLengthExt = path.extname(fullLengthPhoto.name).toLowerCase() || '.jpg';
         const fullLengthFileName = `${registrationId}-fullLength${fullLengthExt}`;
-        const fullLengthBuffer = Buffer.from(await fullLengthPhoto.arrayBuffer());
-        await writeFile(path.join(uploadDir, fullLengthFileName), fullLengthBuffer);
+        const fullLengthBlob = await put(fullLengthFileName, fullLengthPhoto, {
+            access: 'public',
+        });
 
-        // Save Close-Up Photo
+        // Upload Close-Up Photo to Vercel Blob
         const closeUpExt = path.extname(closeUpPhoto.name).toLowerCase() || '.jpg';
         const closeUpFileName = `${registrationId}-closeUp${closeUpExt}`;
-        const closeUpBuffer = Buffer.from(await closeUpPhoto.arrayBuffer());
-        await writeFile(path.join(uploadDir, closeUpFileName), closeUpBuffer);
+        const closeUpBlob = await put(closeUpFileName, closeUpPhoto, {
+            access: 'public',
+        });
 
-        // Add to database
         const registrationData = {
             registrationId,
             id: registrationId,
@@ -101,13 +92,13 @@ export async function POST(request) {
             state,
             city,
             pincode,
-            fullLengthPhoto: `/uploads/${fullLengthFileName}`,
-            closeUpPhoto: `/uploads/${closeUpFileName}`,
+            fullLengthPhoto: fullLengthBlob.url,
+            closeUpPhoto: closeUpBlob.url,
             paymentStatus: 'PENDING',
-            paymentAmount: 0 // To be updated during order creation
+            paymentAmount: 0
         };
 
-        const registration = addRegistration(registrationData);
+        const registration = await addRegistration(registrationData);
 
         return NextResponse.json({ success: true, registration }, { status: 201 });
     } catch (error) {
