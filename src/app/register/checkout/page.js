@@ -18,7 +18,6 @@ function CheckoutContent() {
     const [paymentFailed, setPaymentFailed] = useState(false);
     const [paymentError, setPaymentError] = useState('');
 
-    // Fee breakdown items
     const baseFee = 6999;
     const [gstRate, setGstRate] = useState(18);
     const [gstAmount, setGstAmount] = useState(1259.82);
@@ -30,7 +29,6 @@ function CheckoutContent() {
             return;
         }
 
-        // Fetch applicant details by ID from admin API
         fetch(`/api/admin?search=${regId}`)
             .then((res) => res.json())
             .then((data) => {
@@ -38,8 +36,6 @@ function CheckoutContent() {
                     const match = data.registrations[0];
                     setApplicant(match);
 
-                    // Trigger dynamic amount check from order creation values
-                    // (But initialize local visual calculation instantly)
                     const calculatedGst = parseFloat((baseFee * 0.18).toFixed(2));
                     setGstAmount(calculatedGst);
                     setTotalAmount(baseFee + calculatedGst);
@@ -71,7 +67,6 @@ function CheckoutContent() {
         setPaymentError('');
         setPaymentFailed(false);
 
-        // 1. Ensure Razorpay SDK script is loaded
         const isLoaded = await loadRazorpayScript();
         if (!isLoaded) {
             setPaymentError('Razorpay SDK failed to load. Please verify your internet connection.');
@@ -80,7 +75,6 @@ function CheckoutContent() {
         }
 
         try {
-            // 2. Talk to server-side order builder endpoint
             const orderRes = await fetch('/api/payment/create-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -93,12 +87,10 @@ function CheckoutContent() {
                 throw new Error(orderData.error || 'Failed to initialize server-side payment order.');
             }
 
-            // Sync fee values with server-calculated response just in case
             setGstRate(orderData.gstRate);
             setGstAmount(orderData.gstAmount);
             setTotalAmount(orderData.totalAmount);
 
-            // 3. Configure Razorpay Standard Checkout options
             const options = {
                 key: orderData.keyId,
                 amount: orderData.amount,
@@ -109,7 +101,6 @@ function CheckoutContent() {
                 handler: async function (response) {
                     setProcessing(true);
                     try {
-                        // 4. Send payment signatures to verification endpoint
                         const verifyRes = await fetch('/api/payment/verify', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -123,7 +114,6 @@ function CheckoutContent() {
                         const verifyData = await verifyRes.json();
 
                         if (verifyRes.ok && verifyData.success) {
-                            // Payment confirmed, redirect to success
                             router.push(`/success?id=${regId}&payId=${response.razorpay_payment_id}&date=${new Date().toISOString()}`);
                         } else {
                             throw new Error(verifyData.error || 'Payment validation failed.');
@@ -137,7 +127,6 @@ function CheckoutContent() {
                 },
                 modal: {
                     ondismiss: function () {
-                        // Abandoned payment - keep status as PENDING
                         console.log('Payment modal dismissed by user.');
                         setProcessing(false);
                     }
@@ -148,7 +137,7 @@ function CheckoutContent() {
                     contact: orderData.candidate.phone,
                 },
                 theme: {
-                    color: '#D4AF37', // Gold highlight matching theme
+                    color: '#D4AF37',
                 }
             };
 
@@ -193,7 +182,6 @@ function CheckoutContent() {
         );
     }
 
-    // Display FAILED checkout screen directly inside content component
     if (paymentFailed) {
         return (
             <div className="max-w-md mx-auto px-6 pt-40 pb-24 text-center space-y-8 font-sans text-xs text-white">
@@ -257,7 +245,6 @@ function CheckoutContent() {
     return (
         <div className="max-w-4xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-5 gap-12 pt-40 pb-24 font-sans text-xs text-white">
 
-            {/* Left Column: Summary */}
             <div className="lg:col-span-2 space-y-6 text-[#D9E1EC]/70 font-sans">
                 <div className="border border-[#D4AF37]/15 bg-[#102B52]/40 p-6 space-y-4">
                     <span className="text-[9px] tracking-[0.2em] text-[#D4AF37] font-extrabold uppercase block border-b border-[#D4AF37]/15 pb-2">
@@ -288,7 +275,6 @@ function CheckoutContent() {
                 </div>
             </div>
 
-            {/* Right Column: Checkout triggers */}
             <div className="lg:col-span-3 border border-[#D4AF37]/20 bg-[#0B2347] p-8 flex flex-col justify-between shadow-2xl relative">
 
                 {processing && (
@@ -310,7 +296,6 @@ function CheckoutContent() {
                         </div>
                     </div>
 
-                    {/* Cost summary table */}
                     <div className="bg-[#081C3A] border border-[#D4AF37]/15 p-6 space-y-4">
                         <span className="text-[9px] tracking-[0.25em] text-[#D4AF37] font-bold uppercase block">
                             FEE SUMMARY CALCULATIONS

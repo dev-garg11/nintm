@@ -890,6 +890,33 @@
       "createdAt": "2026-08-15T10:22:07.645Z",
       "updatedAt": "2026-08-15T10:22:20.832Z",
       "applicationStatus": "Payment Pending"
+    },
+    {
+      "registrationId": "NINTM-132660",
+      "id": "NINTM-132660",
+      "name": "vbfv",
+      "fullName": "vbfv",
+      "instagramUsername": "fbdfb",
+      "dateOfBirth": "2026-07-28",
+      "dob": "2026-07-28",
+      "email": "fgvfdvd@gmail.com",
+      "phone": "9876543210",
+      "whatsapp": "9876543210",
+      "height": "177",
+      "state": "Nagaland",
+      "city": "Chandigarh",
+      "pincode": "160030",
+      "fullLengthPhoto": "https://y745ayzipc5fwzyb.public.blob.vercel-storage.com/NINTM-132660-fullLength.jpeg",
+      "closeUpPhoto": "https://y745ayzipc5fwzyb.public.blob.vercel-storage.com/NINTM-132660-closeUp.jpeg",
+      "paymentStatus": "PENDING",
+      "paymentAmount": 0,
+      "razorpayOrderId": "",
+      "razorpayPaymentId": "",
+      "razorpaySignature": "",
+      "paymentDate": "",
+      "createdAt": "2026-08-15T10:32:54.969Z",
+      "updatedAt": "2026-08-15T10:32:54.987Z",
+      "applicationStatus": "Payment Pending"
     }
   ]
 }
