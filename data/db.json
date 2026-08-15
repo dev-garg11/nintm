@@ -836,6 +836,33 @@
       "createdAt": "2026-08-13T14:10:27.015Z",
       "updatedAt": "2026-08-13T14:17:27.064Z",
       "applicationStatus": "Payment Pending"
+    },
+    {
+      "registrationId": "NINTM-635696",
+      "id": "NINTM-635696",
+      "name": "sdfdsf",
+      "fullName": "sdfdsf",
+      "instagramUsername": "fsddsfs",
+      "dateOfBirth": "2026-08-13",
+      "dob": "2026-08-13",
+      "email": "sfdsf@gamil.com",
+      "phone": "1234567891",
+      "whatsapp": "1234567891",
+      "height": "176",
+      "state": "Meghalaya",
+      "city": "Chandigarh",
+      "pincode": "160030",
+      "fullLengthPhoto": "/uploads/NINTM-635696-fullLength.jpeg",
+      "closeUpPhoto": "/uploads/NINTM-635696-closeUp.jpeg",
+      "paymentStatus": "PENDING",
+      "paymentAmount": 8258.82,
+      "razorpayOrderId": "order_TPydMBfvOSE0kV",
+      "razorpayPaymentId": "",
+      "razorpaySignature": "",
+      "paymentDate": "",
+      "createdAt": "2026-08-15T08:18:55.012Z",
+      "updatedAt": "2026-08-15T08:19:04.585Z",
+      "applicationStatus": "Payment Pending"
     }
   ]
 }
