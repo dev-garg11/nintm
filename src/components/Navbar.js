@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
@@ -62,11 +63,15 @@ export default function Navbar() {
                 <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
 
                     {/* Logo Area */}
-                    <Link href="/" className="flex flex-col group">
-                        <span className="font-serif text-xl sm:text-2xl md:text-3xl font-extrabold tracking-widest text-[#D4AF37] group-hover:text-[#C9A24D] transition-colors duration-300">
-                            NINTM
-                        </span>
-
+                    <Link href="/" className="flex items-center group">
+                        <Image
+                            src="/uploads/logo.png"
+                            alt="NINTM Logo"
+                            width={140}
+                            height={50}
+                            className="h-13 sm:h-12 md:h-14 w-auto object-contain"
+                            priority
+                        />
                     </Link>
 
                     {/* Centered Navigation */}
@@ -145,7 +150,13 @@ export default function Navbar() {
 
                 <nav className="flex flex-col items-center space-y-6 text-center">
                     <Link href="/" className="mb-6 flex flex-col items-center" onClick={() => setIsOpen(false)}>
-                        <span className="font-serif text-3xl font-extrabold tracking-widest text-[#D4AF37]">NINTM</span>
+                        <Image
+                            src="/uploads/logo.png"
+                            alt="NINTM Logo"
+                            width={160}
+                            height={60}
+                            className="h-16 w-auto object-contain mb-2"
+                        />
                         <span className="text-[9px] font-sans tracking-[0.4em] text-[#C9A24D] font-bold mt-1">
                             THE COMEBACK 2026
                         </span>

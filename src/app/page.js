@@ -235,7 +235,7 @@ Thank you.`;
 
       {/* Statistics Section */}
       <section id="stats" className="bg-[#06162F] py-14 border-y border-[#D4AF37]/20 scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-[#D4AF37]/20">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-[#D4AF37]/20">
 
           {/* Stat 1: 2012 */}
           <div className="flex flex-col items-center space-y-2.5 text-center md:pb-0 pb-6">
@@ -261,28 +261,6 @@ Thank you.`;
               14 Years of Legacy
             </div>
           </div>
-
-          {/* Stat 2: M & F */}
-          <div className="flex flex-col items-center space-y-2.5 text-center pt-6 md:pt-0 pb-6 md:pb-0">
-            <div className="text-[#D4AF37]">
-              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                <circle cx="9" cy="8" r="3.5" />
-                <path d="M3 19.5c0-3 2.5-5.5 6-5.5s6 2.5 6 5.5" />
-                <circle cx="16" cy="9.5" r="2.8" />
-                <path d="M12 19.5c0-2 1.5-3.5 4-3.5s4 1.5 4 3.5" />
-              </svg>
-            </div>
-            <div className="font-serif text-4xl lg:text-5xl font-light text-[#D4AF37] tracking-wide">
-              M & F
-            </div>
-            <div className="text-[10px] tracking-[0.25em] uppercase text-white font-bold font-sans mt-0.5">
-              MALE & FEMALE
-            </div>
-            <div className="text-[10px] text-[#D9E1EC] font-sans mt-0.5 font-normal">
-              Open Participation
-            </div>
-          </div>
-
           {/* Stat 3: 15L+ */}
           <div className="flex flex-col items-center space-y-2.5 text-center pt-6 md:pt-0 pb-6 md:pb-0">
             <div className="text-[#D4AF37]">
