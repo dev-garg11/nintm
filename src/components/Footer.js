@@ -78,8 +78,8 @@ export default function Footer() {
                         </li>
                         <li className="flex items-start gap-3">
                             <Phone className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
-                            <a href="tel:+918626000002" className="hover:text-[#D4AF37] transition-colors duration-200 leading-relaxed font-mono">
-                                8626-000-002
+                            <a href="tel:+919631596066" className="hover:text-[#D4AF37] transition-colors duration-200 leading-relaxed font-mono">
+                                96315-96066
                             </a>
                         </li>
                         <li className="flex items-start gap-3">
@@ -130,7 +130,7 @@ export default function Footer() {
 
             {/* FLOATING WHATSAPP BUTTON (Concierge Assistance widget) */}
             <a
-                href="https://wa.me/918626000002"
+                href="https://wa.me/919631596066"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Concierge WhatsApp Assistance"

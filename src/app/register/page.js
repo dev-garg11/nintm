@@ -188,7 +188,7 @@ I would like to proceed with my NINTM – The Comeback 2026 registration.
 Thank you.`;
 
             // Open WhatsApp in new tab
-            const targetPhone = '918626000002';
+            const targetPhone = '919631596066';
             const encodedText = encodeURIComponent(whatsappMessage);
             const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedText}`;
 

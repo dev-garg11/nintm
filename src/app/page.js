@@ -121,7 +121,7 @@ I would like to know more about NINTM 2026 and the registration process.
 Thank you.`;
 
     const encodedMessage = encodeURIComponent(messageText);
-    const whatsappUrl = `https://wa.me/918626000002?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/919631596066?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -184,8 +184,8 @@ Thank you.`;
             {/* Mobile Model Banner (Only visible on mobile) */}
             <div className="block lg:hidden w-full aspect-[3/4] relative max-w-[190px] sm:max-w-[240px] mx-auto mb-3 border border-[#D4AF37]/35 p-1.5 bg-[#0B2347] shadow-lg">
               <Image
-                src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800"
-                alt="Model Auditions Banner"
+                src="/uploads/poster .jpeg"
+                alt="NINTM Model Auditions Poster"
                 fill
                 sizes="(max-width: 768px) 190px, 240px"
                 quality={80}
@@ -828,8 +828,8 @@ Thank you.`;
                 <Phone className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-serif font-bold text-white uppercase tracking-wider">Scouting Hotline</h4>
-                  <a href="tel:+918626000002" className="text-[#D9E1EC] hover:text-[#D4AF37] transition-colors block">
-                    8626-000-002
+                  <a href="tel:+919631596066" className="text-[#D9E1EC] hover:text-[#D4AF37] transition-colors block">
+                    96315-96066
                   </a>
                 </div>
               </div>
